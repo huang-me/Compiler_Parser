@@ -1,0 +1,1887 @@
+Terminals unused in grammar
+
+   ADD_ASSIGN
+   SUB_ASSIGN
+   MUL_ASSIGN
+   QUO_ASSIGN
+   REM_ASSIGN
+   PRINT
+   IF
+   ELSE
+   FOR
+
+
+State 50 conflicts: 10 shift/reduce
+State 51 conflicts: 10 shift/reduce
+State 61 conflicts: 10 shift/reduce
+State 75 conflicts: 9 shift/reduce
+State 76 conflicts: 9 shift/reduce
+State 79 conflicts: 10 shift/reduce
+State 80 conflicts: 10 shift/reduce
+State 81 conflicts: 10 shift/reduce
+State 82 conflicts: 10 shift/reduce
+State 87 conflicts: 10 shift/reduce
+State 88 conflicts: 10 shift/reduce
+State 89 conflicts: 10 shift/reduce
+State 90 conflicts: 9 shift/reduce
+State 98 conflicts: 10 shift/reduce
+State 99 conflicts: 9 shift/reduce
+State 100 conflicts: 9 shift/reduce
+State 101 conflicts: 9 shift/reduce
+State 102 conflicts: 9 shift/reduce
+State 109 conflicts: 9 shift/reduce
+State 110 conflicts: 9 shift/reduce
+State 111 conflicts: 9 shift/reduce
+State 114 conflicts: 9 shift/reduce
+State 120 conflicts: 2 shift/reduce
+State 121 conflicts: 2 shift/reduce
+
+
+Grammar
+
+    0 $accept: Program $end
+
+    1 Program: stmt stmts
+    2        | %empty
+
+    3 stmts: stmt stmts
+    4      | %empty
+
+    5 stmt: Def
+    6     | cal
+    7     | print
+    8     | block
+
+    9 $@1: %empty
+
+   10 block: '{' NEWLINE $@1 stmts '}' NEWLINE
+
+   11 Def: VAR ID INT INT_initial
+   12    | VAR ID STRING STR_initial
+   13    | VAR ID FLOAT FLOAT_initial
+   14    | VAR ID BOOL BOOL_initial
+
+   15 BOOL_initial: '=' TRUE NEWLINE
+   16             | '=' FALSE NEWLINE
+   17             | NEWLINE
+
+   18 FLOAT_initial: '=' FLOAT_LIT NEWLINE
+   19              | NEWLINE
+
+   20 INT_initial: '=' INT_LIT NEWLINE
+   21            | NEWLINE
+
+   22 STR_initial: '=' '"' STRING_LIT '"' NEWLINE
+   23            | NEWLINE
+
+   24 cal: ID '+' ID NEWLINE
+   25    | ID '-' ID NEWLINE
+   26    | ID '*' ID NEWLINE
+   27    | ID '/' ID NEWLINE
+   28    | ID '%' ID NEWLINE
+   29    | ID INC NEWLINE
+   30    | ID DEC NEWLINE
+
+   31 $@2: %empty
+
+   32 print: PRINTLN $@2 '(' expr ')' NEWLINE
+
+   33 expr: expr '+' preexpr
+   34     | expr '-' preexpr
+   35     | expr '%' preexpr
+   36     | term
+   37     | expr compare expr
+   38     | andor expr
+   39     | '(' expr ')'
+   40     | bool
+   41     | %empty
+
+   42 preexpr: preexpr '*' preexpr
+   43        | preexpr '/' preexpr
+   44        | '(' expr ')'
+   45        | term
+
+   46 andor: LAND expr
+   47      | LOR expr
+
+   48 $@3: %empty
+
+   49 bool: '!' bool $@3 expr
+   50     | TRUE
+   51     | FALSE
+
+   52 compare: '>' expr
+   53        | '<' expr
+   54        | GEQ expr
+   55        | LEQ expr
+   56        | EQL expr
+   57        | NEQ expr
+
+   58 term: INT_LIT
+   59     | FLOAT_LIT
+   60     | SIGN_INT_LIT
+   61     | SIGN_FLOAT_LIT
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'!' (33) 49
+'"' (34) 22
+'%' (37) 28 35
+'(' (40) 32 39 44
+')' (41) 32 39 44
+'*' (42) 26 42
+'+' (43) 24 33
+'-' (45) 25 34
+'/' (47) 27 43
+'<' (60) 53
+'=' (61) 15 16 18 20 22
+'>' (62) 52
+'{' (123) 10
+'}' (125) 10
+error (256)
+VAR (258) 11 12 13 14
+INT (259) 11
+FLOAT (260) 13
+BOOL (261) 14
+STRING (262) 12
+INC (263) 29
+DEC (264) 30
+GEQ (265) 54
+LEQ (266) 55
+EQL (267) 56
+NEQ (268) 57
+ADD_ASSIGN (269)
+SUB_ASSIGN (270)
+MUL_ASSIGN (271)
+QUO_ASSIGN (272)
+REM_ASSIGN (273)
+LAND (274) 46
+LOR (275) 47
+NEWLINE (276) 10 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 32
+PRINT (277)
+PRINTLN (278) 32
+IF (279)
+ELSE (280)
+FOR (281)
+TRUE (282) 15 50
+FALSE (283) 16 51
+INT_LIT (284) 20 58
+SIGN_INT_LIT (285) 60
+FLOAT_LIT (286) 18 59
+SIGN_FLOAT_LIT (287) 61
+STRING_LIT (288) 22
+ID (289) 11 12 13 14 24 25 26 27 28 29 30
+
+
+Nonterminals, with rules where they appear
+
+$accept (49)
+    on left: 0
+Program (50)
+    on left: 1 2, on right: 0
+stmts (51)
+    on left: 3 4, on right: 1 3 10
+stmt (52)
+    on left: 5 6 7 8, on right: 1 3
+block (53)
+    on left: 10, on right: 8
+$@1 (54)
+    on left: 9, on right: 10
+Def (55)
+    on left: 11 12 13 14, on right: 5
+BOOL_initial (56)
+    on left: 15 16 17, on right: 14
+FLOAT_initial (57)
+    on left: 18 19, on right: 13
+INT_initial (58)
+    on left: 20 21, on right: 11
+STR_initial (59)
+    on left: 22 23, on right: 12
+cal (60)
+    on left: 24 25 26 27 28 29 30, on right: 6
+print (61)
+    on left: 32, on right: 7
+$@2 (62)
+    on left: 31, on right: 32
+expr (63)
+    on left: 33 34 35 36 37 38 39 40 41, on right: 32 33 34 35 37 38
+    39 44 46 47 49 52 53 54 55 56 57
+preexpr (64)
+    on left: 42 43 44 45, on right: 33 34 35 42 43
+andor (65)
+    on left: 46 47, on right: 38
+bool (66)
+    on left: 49 50 51, on right: 40 49
+$@3 (67)
+    on left: 48, on right: 49
+compare (68)
+    on left: 52 53 54 55 56 57, on right: 37
+term (69)
+    on left: 58 59 60 61, on right: 36 45
+
+
+State 0
+
+    0 $accept: . Program $end
+
+    VAR      shift, and go to state 1
+    PRINTLN  shift, and go to state 2
+    ID       shift, and go to state 3
+    '{'      shift, and go to state 4
+
+    $default  reduce using rule 2 (Program)
+
+    Program  go to state 5
+    stmt     go to state 6
+    block    go to state 7
+    Def      go to state 8
+    cal      go to state 9
+    print    go to state 10
+
+
+State 1
+
+   11 Def: VAR . ID INT INT_initial
+   12    | VAR . ID STRING STR_initial
+   13    | VAR . ID FLOAT FLOAT_initial
+   14    | VAR . ID BOOL BOOL_initial
+
+    ID  shift, and go to state 11
+
+
+State 2
+
+   32 print: PRINTLN . $@2 '(' expr ')' NEWLINE
+
+    $default  reduce using rule 31 ($@2)
+
+    $@2  go to state 12
+
+
+State 3
+
+   24 cal: ID . '+' ID NEWLINE
+   25    | ID . '-' ID NEWLINE
+   26    | ID . '*' ID NEWLINE
+   27    | ID . '/' ID NEWLINE
+   28    | ID . '%' ID NEWLINE
+   29    | ID . INC NEWLINE
+   30    | ID . DEC NEWLINE
+
+    INC  shift, and go to state 13
+    DEC  shift, and go to state 14
+    '+'  shift, and go to state 15
+    '-'  shift, and go to state 16
+    '*'  shift, and go to state 17
+    '/'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+
+State 4
+
+   10 block: '{' . NEWLINE $@1 stmts '}' NEWLINE
+
+    NEWLINE  shift, and go to state 20
+
+
+State 5
+
+    0 $accept: Program . $end
+
+    $end  shift, and go to state 21
+
+
+State 6
+
+    1 Program: stmt . stmts
+
+    VAR      shift, and go to state 1
+    PRINTLN  shift, and go to state 2
+    ID       shift, and go to state 3
+    '{'      shift, and go to state 4
+
+    $default  reduce using rule 4 (stmts)
+
+    stmts  go to state 22
+    stmt   go to state 23
+    block  go to state 7
+    Def    go to state 8
+    cal    go to state 9
+    print  go to state 10
+
+
+State 7
+
+    8 stmt: block .
+
+    $default  reduce using rule 8 (stmt)
+
+
+State 8
+
+    5 stmt: Def .
+
+    $default  reduce using rule 5 (stmt)
+
+
+State 9
+
+    6 stmt: cal .
+
+    $default  reduce using rule 6 (stmt)
+
+
+State 10
+
+    7 stmt: print .
+
+    $default  reduce using rule 7 (stmt)
+
+
+State 11
+
+   11 Def: VAR ID . INT INT_initial
+   12    | VAR ID . STRING STR_initial
+   13    | VAR ID . FLOAT FLOAT_initial
+   14    | VAR ID . BOOL BOOL_initial
+
+    INT     shift, and go to state 24
+    FLOAT   shift, and go to state 25
+    BOOL    shift, and go to state 26
+    STRING  shift, and go to state 27
+
+
+State 12
+
+   32 print: PRINTLN $@2 . '(' expr ')' NEWLINE
+
+    '('  shift, and go to state 28
+
+
+State 13
+
+   29 cal: ID INC . NEWLINE
+
+    NEWLINE  shift, and go to state 29
+
+
+State 14
+
+   30 cal: ID DEC . NEWLINE
+
+    NEWLINE  shift, and go to state 30
+
+
+State 15
+
+   24 cal: ID '+' . ID NEWLINE
+
+    ID  shift, and go to state 31
+
+
+State 16
+
+   25 cal: ID '-' . ID NEWLINE
+
+    ID  shift, and go to state 32
+
+
+State 17
+
+   26 cal: ID '*' . ID NEWLINE
+
+    ID  shift, and go to state 33
+
+
+State 18
+
+   27 cal: ID '/' . ID NEWLINE
+
+    ID  shift, and go to state 34
+
+
+State 19
+
+   28 cal: ID '%' . ID NEWLINE
+
+    ID  shift, and go to state 35
+
+
+State 20
+
+   10 block: '{' NEWLINE . $@1 stmts '}' NEWLINE
+
+    $default  reduce using rule 9 ($@1)
+
+    $@1  go to state 36
+
+
+State 21
+
+    0 $accept: Program $end .
+
+    $default  accept
+
+
+State 22
+
+    1 Program: stmt stmts .
+
+    $default  reduce using rule 1 (Program)
+
+
+State 23
+
+    3 stmts: stmt . stmts
+
+    VAR      shift, and go to state 1
+    PRINTLN  shift, and go to state 2
+    ID       shift, and go to state 3
+    '{'      shift, and go to state 4
+
+    $default  reduce using rule 4 (stmts)
+
+    stmts  go to state 37
+    stmt   go to state 23
+    block  go to state 7
+    Def    go to state 8
+    cal    go to state 9
+    print  go to state 10
+
+
+State 24
+
+   11 Def: VAR ID INT . INT_initial
+
+    NEWLINE  shift, and go to state 38
+    '='      shift, and go to state 39
+
+    INT_initial  go to state 40
+
+
+State 25
+
+   13 Def: VAR ID FLOAT . FLOAT_initial
+
+    NEWLINE  shift, and go to state 41
+    '='      shift, and go to state 42
+
+    FLOAT_initial  go to state 43
+
+
+State 26
+
+   14 Def: VAR ID BOOL . BOOL_initial
+
+    NEWLINE  shift, and go to state 44
+    '='      shift, and go to state 45
+
+    BOOL_initial  go to state 46
+
+
+State 27
+
+   12 Def: VAR ID STRING . STR_initial
+
+    NEWLINE  shift, and go to state 47
+    '='      shift, and go to state 48
+
+    STR_initial  go to state 49
+
+
+State 28
+
+   32 print: PRINTLN $@2 '(' . expr ')' NEWLINE
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    $default  reduce using rule 41 (expr)
+
+    expr   go to state 60
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 29
+
+   29 cal: ID INC NEWLINE .
+
+    $default  reduce using rule 29 (cal)
+
+
+State 30
+
+   30 cal: ID DEC NEWLINE .
+
+    $default  reduce using rule 30 (cal)
+
+
+State 31
+
+   24 cal: ID '+' ID . NEWLINE
+
+    NEWLINE  shift, and go to state 64
+
+
+State 32
+
+   25 cal: ID '-' ID . NEWLINE
+
+    NEWLINE  shift, and go to state 65
+
+
+State 33
+
+   26 cal: ID '*' ID . NEWLINE
+
+    NEWLINE  shift, and go to state 66
+
+
+State 34
+
+   27 cal: ID '/' ID . NEWLINE
+
+    NEWLINE  shift, and go to state 67
+
+
+State 35
+
+   28 cal: ID '%' ID . NEWLINE
+
+    NEWLINE  shift, and go to state 68
+
+
+State 36
+
+   10 block: '{' NEWLINE $@1 . stmts '}' NEWLINE
+
+    VAR      shift, and go to state 1
+    PRINTLN  shift, and go to state 2
+    ID       shift, and go to state 3
+    '{'      shift, and go to state 4
+
+    $default  reduce using rule 4 (stmts)
+
+    stmts  go to state 69
+    stmt   go to state 23
+    block  go to state 7
+    Def    go to state 8
+    cal    go to state 9
+    print  go to state 10
+
+
+State 37
+
+    3 stmts: stmt stmts .
+
+    $default  reduce using rule 3 (stmts)
+
+
+State 38
+
+   21 INT_initial: NEWLINE .
+
+    $default  reduce using rule 21 (INT_initial)
+
+
+State 39
+
+   20 INT_initial: '=' . INT_LIT NEWLINE
+
+    INT_LIT  shift, and go to state 70
+
+
+State 40
+
+   11 Def: VAR ID INT INT_initial .
+
+    $default  reduce using rule 11 (Def)
+
+
+State 41
+
+   19 FLOAT_initial: NEWLINE .
+
+    $default  reduce using rule 19 (FLOAT_initial)
+
+
+State 42
+
+   18 FLOAT_initial: '=' . FLOAT_LIT NEWLINE
+
+    FLOAT_LIT  shift, and go to state 71
+
+
+State 43
+
+   13 Def: VAR ID FLOAT FLOAT_initial .
+
+    $default  reduce using rule 13 (Def)
+
+
+State 44
+
+   17 BOOL_initial: NEWLINE .
+
+    $default  reduce using rule 17 (BOOL_initial)
+
+
+State 45
+
+   15 BOOL_initial: '=' . TRUE NEWLINE
+   16             | '=' . FALSE NEWLINE
+
+    TRUE   shift, and go to state 72
+    FALSE  shift, and go to state 73
+
+
+State 46
+
+   14 Def: VAR ID BOOL BOOL_initial .
+
+    $default  reduce using rule 14 (Def)
+
+
+State 47
+
+   23 STR_initial: NEWLINE .
+
+    $default  reduce using rule 23 (STR_initial)
+
+
+State 48
+
+   22 STR_initial: '=' . '"' STRING_LIT '"' NEWLINE
+
+    '"'  shift, and go to state 74
+
+
+State 49
+
+   12 Def: VAR ID STRING STR_initial .
+
+    $default  reduce using rule 12 (Def)
+
+
+State 50
+
+   46 andor: LAND . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 75
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 51
+
+   47 andor: LOR . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 76
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 52
+
+   50 bool: TRUE .
+
+    $default  reduce using rule 50 (bool)
+
+
+State 53
+
+   51 bool: FALSE .
+
+    $default  reduce using rule 51 (bool)
+
+
+State 54
+
+   58 term: INT_LIT .
+
+    $default  reduce using rule 58 (term)
+
+
+State 55
+
+   60 term: SIGN_INT_LIT .
+
+    $default  reduce using rule 60 (term)
+
+
+State 56
+
+   59 term: FLOAT_LIT .
+
+    $default  reduce using rule 59 (term)
+
+
+State 57
+
+   61 term: SIGN_FLOAT_LIT .
+
+    $default  reduce using rule 61 (term)
+
+
+State 58
+
+   39 expr: '(' . expr ')'
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    $default  reduce using rule 41 (expr)
+
+    expr   go to state 77
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 59
+
+   49 bool: '!' . bool $@3 expr
+
+    TRUE   shift, and go to state 52
+    FALSE  shift, and go to state 53
+    '!'    shift, and go to state 59
+
+    bool  go to state 78
+
+
+State 60
+
+   32 print: PRINTLN $@2 '(' expr . ')' NEWLINE
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    ')'  shift, and go to state 86
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    compare  go to state 89
+
+
+State 61
+
+   38 expr: andor . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 90
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 62
+
+   40 expr: bool .
+
+    $default  reduce using rule 40 (expr)
+
+
+State 63
+
+   36 expr: term .
+
+    $default  reduce using rule 36 (expr)
+
+
+State 64
+
+   24 cal: ID '+' ID NEWLINE .
+
+    $default  reduce using rule 24 (cal)
+
+
+State 65
+
+   25 cal: ID '-' ID NEWLINE .
+
+    $default  reduce using rule 25 (cal)
+
+
+State 66
+
+   26 cal: ID '*' ID NEWLINE .
+
+    $default  reduce using rule 26 (cal)
+
+
+State 67
+
+   27 cal: ID '/' ID NEWLINE .
+
+    $default  reduce using rule 27 (cal)
+
+
+State 68
+
+   28 cal: ID '%' ID NEWLINE .
+
+    $default  reduce using rule 28 (cal)
+
+
+State 69
+
+   10 block: '{' NEWLINE $@1 stmts . '}' NEWLINE
+
+    '}'  shift, and go to state 91
+
+
+State 70
+
+   20 INT_initial: '=' INT_LIT . NEWLINE
+
+    NEWLINE  shift, and go to state 92
+
+
+State 71
+
+   18 FLOAT_initial: '=' FLOAT_LIT . NEWLINE
+
+    NEWLINE  shift, and go to state 93
+
+
+State 72
+
+   15 BOOL_initial: '=' TRUE . NEWLINE
+
+    NEWLINE  shift, and go to state 94
+
+
+State 73
+
+   16 BOOL_initial: '=' FALSE . NEWLINE
+
+    NEWLINE  shift, and go to state 95
+
+
+State 74
+
+   22 STR_initial: '=' '"' . STRING_LIT '"' NEWLINE
+
+    STRING_LIT  shift, and go to state 96
+
+
+State 75
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   46 andor: LAND expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 46 (andor)]
+    LEQ       [reduce using rule 46 (andor)]
+    EQL       [reduce using rule 46 (andor)]
+    NEQ       [reduce using rule 46 (andor)]
+    '+'       [reduce using rule 46 (andor)]
+    '-'       [reduce using rule 46 (andor)]
+    '%'       [reduce using rule 46 (andor)]
+    '>'       [reduce using rule 46 (andor)]
+    '<'       [reduce using rule 46 (andor)]
+    $default  reduce using rule 46 (andor)
+
+    compare  go to state 89
+
+
+State 76
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   47 andor: LOR expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 47 (andor)]
+    LEQ       [reduce using rule 47 (andor)]
+    EQL       [reduce using rule 47 (andor)]
+    NEQ       [reduce using rule 47 (andor)]
+    '+'       [reduce using rule 47 (andor)]
+    '-'       [reduce using rule 47 (andor)]
+    '%'       [reduce using rule 47 (andor)]
+    '>'       [reduce using rule 47 (andor)]
+    '<'       [reduce using rule 47 (andor)]
+    $default  reduce using rule 47 (andor)
+
+    compare  go to state 89
+
+
+State 77
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   39     | '(' expr . ')'
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    ')'  shift, and go to state 97
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    compare  go to state 89
+
+
+State 78
+
+   49 bool: '!' bool . $@3 expr
+
+    $default  reduce using rule 48 ($@3)
+
+    $@3  go to state 98
+
+
+State 79
+
+   54 compare: GEQ . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 99
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 80
+
+   55 compare: LEQ . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 100
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 81
+
+   56 compare: EQL . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 101
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 82
+
+   57 compare: NEQ . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 102
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 83
+
+   33 expr: expr '+' . preexpr
+
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 103
+
+    preexpr  go to state 104
+    term     go to state 105
+
+
+State 84
+
+   34 expr: expr '-' . preexpr
+
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 103
+
+    preexpr  go to state 106
+    term     go to state 105
+
+
+State 85
+
+   35 expr: expr '%' . preexpr
+
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 103
+
+    preexpr  go to state 107
+    term     go to state 105
+
+
+State 86
+
+   32 print: PRINTLN $@2 '(' expr ')' . NEWLINE
+
+    NEWLINE  shift, and go to state 108
+
+
+State 87
+
+   52 compare: '>' . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 109
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 88
+
+   53 compare: '<' . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 110
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 89
+
+   37 expr: expr compare . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 111
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 90
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   38     | andor expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 38 (expr)]
+    LEQ       [reduce using rule 38 (expr)]
+    EQL       [reduce using rule 38 (expr)]
+    NEQ       [reduce using rule 38 (expr)]
+    '+'       [reduce using rule 38 (expr)]
+    '-'       [reduce using rule 38 (expr)]
+    '%'       [reduce using rule 38 (expr)]
+    '>'       [reduce using rule 38 (expr)]
+    '<'       [reduce using rule 38 (expr)]
+    $default  reduce using rule 38 (expr)
+
+    compare  go to state 89
+
+
+State 91
+
+   10 block: '{' NEWLINE $@1 stmts '}' . NEWLINE
+
+    NEWLINE  shift, and go to state 112
+
+
+State 92
+
+   20 INT_initial: '=' INT_LIT NEWLINE .
+
+    $default  reduce using rule 20 (INT_initial)
+
+
+State 93
+
+   18 FLOAT_initial: '=' FLOAT_LIT NEWLINE .
+
+    $default  reduce using rule 18 (FLOAT_initial)
+
+
+State 94
+
+   15 BOOL_initial: '=' TRUE NEWLINE .
+
+    $default  reduce using rule 15 (BOOL_initial)
+
+
+State 95
+
+   16 BOOL_initial: '=' FALSE NEWLINE .
+
+    $default  reduce using rule 16 (BOOL_initial)
+
+
+State 96
+
+   22 STR_initial: '=' '"' STRING_LIT . '"' NEWLINE
+
+    '"'  shift, and go to state 113
+
+
+State 97
+
+   39 expr: '(' expr ')' .
+
+    $default  reduce using rule 39 (expr)
+
+
+State 98
+
+   49 bool: '!' bool $@3 . expr
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    LAND            [reduce using rule 41 (expr)]
+    LOR             [reduce using rule 41 (expr)]
+    TRUE            [reduce using rule 41 (expr)]
+    FALSE           [reduce using rule 41 (expr)]
+    INT_LIT         [reduce using rule 41 (expr)]
+    SIGN_INT_LIT    [reduce using rule 41 (expr)]
+    FLOAT_LIT       [reduce using rule 41 (expr)]
+    SIGN_FLOAT_LIT  [reduce using rule 41 (expr)]
+    '('             [reduce using rule 41 (expr)]
+    '!'             [reduce using rule 41 (expr)]
+    $default        reduce using rule 41 (expr)
+
+    expr   go to state 114
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 99
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   54 compare: GEQ expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 54 (compare)]
+    LEQ       [reduce using rule 54 (compare)]
+    EQL       [reduce using rule 54 (compare)]
+    NEQ       [reduce using rule 54 (compare)]
+    '+'       [reduce using rule 54 (compare)]
+    '-'       [reduce using rule 54 (compare)]
+    '%'       [reduce using rule 54 (compare)]
+    '>'       [reduce using rule 54 (compare)]
+    '<'       [reduce using rule 54 (compare)]
+    $default  reduce using rule 54 (compare)
+
+    compare  go to state 89
+
+
+State 100
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   55 compare: LEQ expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 55 (compare)]
+    LEQ       [reduce using rule 55 (compare)]
+    EQL       [reduce using rule 55 (compare)]
+    NEQ       [reduce using rule 55 (compare)]
+    '+'       [reduce using rule 55 (compare)]
+    '-'       [reduce using rule 55 (compare)]
+    '%'       [reduce using rule 55 (compare)]
+    '>'       [reduce using rule 55 (compare)]
+    '<'       [reduce using rule 55 (compare)]
+    $default  reduce using rule 55 (compare)
+
+    compare  go to state 89
+
+
+State 101
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   56 compare: EQL expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 56 (compare)]
+    LEQ       [reduce using rule 56 (compare)]
+    EQL       [reduce using rule 56 (compare)]
+    NEQ       [reduce using rule 56 (compare)]
+    '+'       [reduce using rule 56 (compare)]
+    '-'       [reduce using rule 56 (compare)]
+    '%'       [reduce using rule 56 (compare)]
+    '>'       [reduce using rule 56 (compare)]
+    '<'       [reduce using rule 56 (compare)]
+    $default  reduce using rule 56 (compare)
+
+    compare  go to state 89
+
+
+State 102
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   57 compare: NEQ expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 57 (compare)]
+    LEQ       [reduce using rule 57 (compare)]
+    EQL       [reduce using rule 57 (compare)]
+    NEQ       [reduce using rule 57 (compare)]
+    '+'       [reduce using rule 57 (compare)]
+    '-'       [reduce using rule 57 (compare)]
+    '%'       [reduce using rule 57 (compare)]
+    '>'       [reduce using rule 57 (compare)]
+    '<'       [reduce using rule 57 (compare)]
+    $default  reduce using rule 57 (compare)
+
+    compare  go to state 89
+
+
+State 103
+
+   44 preexpr: '(' . expr ')'
+
+    LAND            shift, and go to state 50
+    LOR             shift, and go to state 51
+    TRUE            shift, and go to state 52
+    FALSE           shift, and go to state 53
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 58
+    '!'             shift, and go to state 59
+
+    $default  reduce using rule 41 (expr)
+
+    expr   go to state 115
+    andor  go to state 61
+    bool   go to state 62
+    term   go to state 63
+
+
+State 104
+
+   33 expr: expr '+' preexpr .
+   42 preexpr: preexpr . '*' preexpr
+   43        | preexpr . '/' preexpr
+
+    '*'  shift, and go to state 116
+    '/'  shift, and go to state 117
+
+    $default  reduce using rule 33 (expr)
+
+
+State 105
+
+   45 preexpr: term .
+
+    $default  reduce using rule 45 (preexpr)
+
+
+State 106
+
+   34 expr: expr '-' preexpr .
+   42 preexpr: preexpr . '*' preexpr
+   43        | preexpr . '/' preexpr
+
+    '*'  shift, and go to state 116
+    '/'  shift, and go to state 117
+
+    $default  reduce using rule 34 (expr)
+
+
+State 107
+
+   35 expr: expr '%' preexpr .
+   42 preexpr: preexpr . '*' preexpr
+   43        | preexpr . '/' preexpr
+
+    '*'  shift, and go to state 116
+    '/'  shift, and go to state 117
+
+    $default  reduce using rule 35 (expr)
+
+
+State 108
+
+   32 print: PRINTLN $@2 '(' expr ')' NEWLINE .
+
+    $default  reduce using rule 32 (print)
+
+
+State 109
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   52 compare: '>' expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 52 (compare)]
+    LEQ       [reduce using rule 52 (compare)]
+    EQL       [reduce using rule 52 (compare)]
+    NEQ       [reduce using rule 52 (compare)]
+    '+'       [reduce using rule 52 (compare)]
+    '-'       [reduce using rule 52 (compare)]
+    '%'       [reduce using rule 52 (compare)]
+    '>'       [reduce using rule 52 (compare)]
+    '<'       [reduce using rule 52 (compare)]
+    $default  reduce using rule 52 (compare)
+
+    compare  go to state 89
+
+
+State 110
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   53 compare: '<' expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 53 (compare)]
+    LEQ       [reduce using rule 53 (compare)]
+    EQL       [reduce using rule 53 (compare)]
+    NEQ       [reduce using rule 53 (compare)]
+    '+'       [reduce using rule 53 (compare)]
+    '-'       [reduce using rule 53 (compare)]
+    '%'       [reduce using rule 53 (compare)]
+    '>'       [reduce using rule 53 (compare)]
+    '<'       [reduce using rule 53 (compare)]
+    $default  reduce using rule 53 (compare)
+
+    compare  go to state 89
+
+
+State 111
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   37     | expr compare expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 37 (expr)]
+    LEQ       [reduce using rule 37 (expr)]
+    EQL       [reduce using rule 37 (expr)]
+    NEQ       [reduce using rule 37 (expr)]
+    '+'       [reduce using rule 37 (expr)]
+    '-'       [reduce using rule 37 (expr)]
+    '%'       [reduce using rule 37 (expr)]
+    '>'       [reduce using rule 37 (expr)]
+    '<'       [reduce using rule 37 (expr)]
+    $default  reduce using rule 37 (expr)
+
+    compare  go to state 89
+
+
+State 112
+
+   10 block: '{' NEWLINE $@1 stmts '}' NEWLINE .
+
+    $default  reduce using rule 10 (block)
+
+
+State 113
+
+   22 STR_initial: '=' '"' STRING_LIT '"' . NEWLINE
+
+    NEWLINE  shift, and go to state 118
+
+
+State 114
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   49 bool: '!' bool $@3 expr .
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    GEQ       [reduce using rule 49 (bool)]
+    LEQ       [reduce using rule 49 (bool)]
+    EQL       [reduce using rule 49 (bool)]
+    NEQ       [reduce using rule 49 (bool)]
+    '+'       [reduce using rule 49 (bool)]
+    '-'       [reduce using rule 49 (bool)]
+    '%'       [reduce using rule 49 (bool)]
+    '>'       [reduce using rule 49 (bool)]
+    '<'       [reduce using rule 49 (bool)]
+    $default  reduce using rule 49 (bool)
+
+    compare  go to state 89
+
+
+State 115
+
+   33 expr: expr . '+' preexpr
+   34     | expr . '-' preexpr
+   35     | expr . '%' preexpr
+   37     | expr . compare expr
+   44 preexpr: '(' expr . ')'
+
+    GEQ  shift, and go to state 79
+    LEQ  shift, and go to state 80
+    EQL  shift, and go to state 81
+    NEQ  shift, and go to state 82
+    '+'  shift, and go to state 83
+    '-'  shift, and go to state 84
+    '%'  shift, and go to state 85
+    ')'  shift, and go to state 119
+    '>'  shift, and go to state 87
+    '<'  shift, and go to state 88
+
+    compare  go to state 89
+
+
+State 116
+
+   42 preexpr: preexpr '*' . preexpr
+
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 103
+
+    preexpr  go to state 120
+    term     go to state 105
+
+
+State 117
+
+   43 preexpr: preexpr '/' . preexpr
+
+    INT_LIT         shift, and go to state 54
+    SIGN_INT_LIT    shift, and go to state 55
+    FLOAT_LIT       shift, and go to state 56
+    SIGN_FLOAT_LIT  shift, and go to state 57
+    '('             shift, and go to state 103
+
+    preexpr  go to state 121
+    term     go to state 105
+
+
+State 118
+
+   22 STR_initial: '=' '"' STRING_LIT '"' NEWLINE .
+
+    $default  reduce using rule 22 (STR_initial)
+
+
+State 119
+
+   44 preexpr: '(' expr ')' .
+
+    $default  reduce using rule 44 (preexpr)
+
+
+State 120
+
+   42 preexpr: preexpr . '*' preexpr
+   42        | preexpr '*' preexpr .
+   43        | preexpr . '/' preexpr
+
+    '*'  shift, and go to state 116
+    '/'  shift, and go to state 117
+
+    '*'       [reduce using rule 42 (preexpr)]
+    '/'       [reduce using rule 42 (preexpr)]
+    $default  reduce using rule 42 (preexpr)
+
+
+State 121
+
+   42 preexpr: preexpr . '*' preexpr
+   43        | preexpr . '/' preexpr
+   43        | preexpr '/' preexpr .
+
+    '*'  shift, and go to state 116
+    '/'  shift, and go to state 117
+
+    '*'       [reduce using rule 43 (preexpr)]
+    '/'       [reduce using rule 43 (preexpr)]
+    $default  reduce using rule 43 (preexpr)
