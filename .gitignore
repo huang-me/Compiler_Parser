@@ -1,3 +1,5 @@
-j.*
+j.output
+j.tab.c
+j.tab.h
 myparser
 lex.yy.c
