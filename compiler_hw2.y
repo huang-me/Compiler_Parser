@@ -20,6 +20,9 @@
     /* for println flag */
     int printflag = 0;
 
+    /* for type */
+    char *tmp_type;
+
     void yyerror (char const *s)
     {
         printf("error:%d: %s\n", yylineno, s);
@@ -27,7 +30,7 @@
 
     /* Symbol table function - you can add new function if needed. */
     static void create_symbol();
-    static void insert_symbol(int, char*, char*, int);
+    static void insert_symbol(int, char*, char*, int, char*);
     static int lookup_symbol(char*);
     static void dump_symbol(int);
 %}
@@ -85,19 +88,36 @@ stmts
 
 stmt
     : Def
+    | NEWLINE
     | cal
     | print
     | block
+    | setVal
+;
+
+setVal
+    : ID '[' INT_LIT  { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1), $3);} ']' value_initial  { printf("ASSIGN\n"); }
+;
+
+value_initial
+    : '=' expr NEWLINE
+    |
 ;
 
 block
     : '{' NEWLINE {scope++;} stmts '}' NEWLINE     { scope--; }
 
 Def
-    : VAR ID INT INT_initial        { insert_symbol( scope, $2, "int32", yylineno); }
-    | VAR ID STRING STR_initial     { insert_symbol( scope, $2, "string", yylineno); }
-    | VAR ID FLOAT FLOAT_initial    { insert_symbol( scope, $2, "float32", yylineno); }
-    | VAR ID BOOL BOOL_initial      { insert_symbol( scope, $2, "bool", yylineno); }
+    : VAR ID INT INT_initial        { insert_symbol( scope, $2, "int32", yylineno, "-"); }
+    | VAR ID STRING STR_initial     { insert_symbol( scope, $2, "string", yylineno, "-"); }
+    | VAR ID FLOAT FLOAT_initial    { insert_symbol( scope, $2, "float32", yylineno, "-"); }
+    | VAR ID BOOL BOOL_initial      { insert_symbol( scope, $2, "bool", yylineno, "-"); }
+    | VAR ID '[' INT_LIT { printf("INT_LIT %d\n", $4); } ']' typee NEWLINE   { insert_symbol( scope, $2, "array", yylineno, tmp_type); }
+;
+
+typee
+    : INT           { tmp_type = "int32"; }
+    | FLOAT         { tmp_type = "float32"; }
 ;
 
 BOOL_initial
@@ -160,7 +180,7 @@ cal
 print
     : PRINTLN { printflag = 0; } '(' expr ')' NEWLINE {
         if(printflag == 0)
-            printf("PRINTLN INT32\n");
+            printf("PRINTLN int32\n");
         else if(printflag == 1)
             printf("PRINTLN bool\n");
         else if(printflag == 2)
@@ -174,6 +194,7 @@ expr
     : expr '+' preexpr  {printf("ADD\n");}
     | expr '-' preexpr  {printf("SUB\n");}
     | expr '%' preexpr  {printf("REM\n");}
+    | preexpr
     | term
     | expr compare expr     { printflag = 1; }
     | andor expr
@@ -202,32 +223,37 @@ bool
 
 compare
     : '>' expr      { printf("GTR\n"); }
-    | '<' expr
-    | GEQ expr
-    | LEQ expr
-    | EQL expr
-    | NEQ expr
+    | '<' expr      { printf("LSS\n"); }
+    | GEQ expr      { printf("GEQ\n"); }
+    | LEQ expr      { printf("LEQ\n"); }
+    | EQL expr      { printf("EQL\n"); }
+    | NEQ expr      { printf("NEQ\n"); }
 ;
 
 term
-    : INT_LIT           { printf("INT_LIT %d\n", $1); }
-    | FLOAT_LIT         { printf("FLOAT_LIT %f\n", $1); }
-    | SIGN_INT_LIT      { printf("INT_LIT %d\n", abs($1)); 
-                            if( abs($1) == $1) {
-                                printf("POS\n");
+    : INT_LIT               { printf("INT_LIT %d\n", $1); }
+    | FLOAT_LIT             { printf("FLOAT_LIT %f\n", $1); }
+    | SIGN_INT_LIT          { printf("INT_LIT %d\n", abs($1)); 
+                                if( abs($1) == $1) {
+                                    printf("POS\n");
+                                }
+                                else {
+                                    printf("NEG\n");
+                                }
                             }
-                            else {
-                                printf("NEG\n");
+    | SIGN_FLOAT_LIT        { printf("FLOAT_LIT %f\n", fabs($1)); 
+                                if( abs($1) == $1) {
+                                    printf("POS\n");
+                                }
+                                else {
+                                    printf("NEG\n");
+                                }
                             }
-                        }
-    | SIGN_FLOAT_LIT    { printf("FLOAT_LIT %f\n", fabs($1)); 
-                            if( abs($1) == $1) {
-                                printf("POS\n");
-                            }
-                            else {
-                                printf("NEG\n");
-                            }
-                        }
+    | ID { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); } '[' expr ']' 
+            {   if(elementType[lookup_symbol($1)] == "float32")
+                    printflag = 2;
+                else if(elementType[lookup_symbol($1)] == "string")
+                    printflag = 3; }
 ;
 
 %%
@@ -264,7 +290,7 @@ static void create_symbol() {
     }
 }
 
-static void insert_symbol(int level, char *id, char *type, int linenum) {
+static void insert_symbol(int level, char *id, char *type, int linenum, char *element) {
     printf("> Insert {%s} into symbol table (scope level: %d)\n", id, level);
     
     int i = varNum;
@@ -272,7 +298,7 @@ static void insert_symbol(int level, char *id, char *type, int linenum) {
     name[i] = id;
     typeArr[i] = type;
     lineno[i] = linenum;
-    elementType[i] = "-";
+    elementType[i] = element;
     scopeArr[i] = level;
 
     symNum[level]++;
