@@ -3,6 +3,7 @@
     #include "common.h" //Extern variables that communicate with lex
     #include <stdio.h>
     #include <math.h>
+    #include <string.h>
     // #define YYDEBUG 1
     // int yydebug = 1;
 
@@ -96,7 +97,29 @@ stmt
 ;
 
 setVal
-    : ID '[' INT_LIT  { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1), $3);} ']' value_initial  { printf("ASSIGN\n"); }
+    : ID '[' INT_LIT    { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1), $3);} ']' value_initial  { printf("ASSIGN\n"); }
+    | ident assignVal
+;
+
+var
+    : INT_LIT               {printf("INT_LIT %d\n", $1);}
+    | FLOAT_LIT             {printf("FLOAT_LIT %f\n", $1);}
+    | '"' STRING_LIT '"'    {printf("STRING_LIT %s\n", $2);}
+    | TRUE                  {printf("TRUE\n");}
+    | FALSE                 {printf("FALSE\n");}
+;
+
+assignVal
+    : '=' var           { printf("ASSIGN\n"); }
+    | ADD_ASSIGN var    { printf("ADD_ASSIGN\n"); }
+    | SUB_ASSIGN var    { printf("SUB_ASSIGN\n"); }
+    | MUL_ASSIGN var    { printf("MUL_ASSIGN\n"); }
+    | QUO_ASSIGN var    { printf("QUO_ASSIGN\n"); }
+    | REM_ASSIGN var    { printf("REM_ASSIGN\n"); }
+;
+
+ident
+    : ID    { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); }
 ;
 
 value_initial
@@ -106,6 +129,7 @@ value_initial
 
 block
     : '{' NEWLINE {scope++;} stmts '}' NEWLINE     { scope--; }
+;
 
 Def
     : VAR ID INT INT_initial        { insert_symbol( scope, $2, "int32", yylineno, "-"); }
@@ -250,10 +274,18 @@ term
                                 }
                             }
     | ID { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); } '[' expr ']' 
-            {   if(elementType[lookup_symbol($1)] == "float32")
+            {   if( strcmp(elementType[lookup_symbol($1)],"float32") == 0 )
                     printflag = 2;
-                else if(elementType[lookup_symbol($1)] == "string")
+                else if( strcmp(elementType[lookup_symbol($1)],"string") == 0 )
                     printflag = 3; }
+    | ID    {   printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); 
+                if( strcmp(typeArr[lookup_symbol($1)],"float32") == 0 )
+                    printflag = 2;
+                else if( strcmp(typeArr[lookup_symbol($1)],"string") == 0 )
+                    printflag = 3;
+                else if( strcmp(typeArr[lookup_symbol($1)],"bool") == 0 )
+                    printflag = 1;
+            }
 ;
 
 %%
