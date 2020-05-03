@@ -94,7 +94,16 @@ stmt
     | print
     | block
     | setVal
+    | error_assign
 ;
+
+error_assign
+    : INT_LIT {printf("INT_LIT %d\n", $1);} assignVal   {
+        printf("error:%d: cannot assign to int32\n", yylineno);
+    }
+    | FLOAT_LIT {printf("FLOAT_LIT %f\n", $1);} assignVal   {
+        printf("error:%d: cannot assign to float32\n", yylineno);
+    }
 
 setVal
     : ID '[' INT_LIT    { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1), $3);} ']' value_initial  { printf("ASSIGN\n"); }
