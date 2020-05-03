@@ -27,6 +27,11 @@
     /* for check scope */
     int tmp_scope, i;
 
+    /* for check type */
+    int type1, type2;
+    int add1, add2;
+    char ty1[10],ty2[10];
+
     void yyerror (char const *s)
     {
         printf("error:%d: %s\n", yylineno, s);
@@ -138,15 +143,37 @@ setVal
 
 var
     : INT_LIT               {printf("INT_LIT %d\n", $1);}
-    | FLOAT_LIT             {printf("FLOAT_LIT %f\n", $1);}
-    | '"' STRING_LIT '"'    {printf("STRING_LIT %s\n", $2);}
-    | TRUE                  {printf("TRUE\n");}
-    | FALSE                 {printf("FALSE\n");}
+    | FLOAT_LIT             {printf("FLOAT_LIT %f\n", $1); type2 = 2;}
+    | '"' STRING_LIT '"'    {printf("STRING_LIT %s\n", $2); type2 = 3;}
+    | TRUE                  {printf("TRUE\n"); type2 = 1;}
+    | FALSE                 {printf("FALSE\n"); type2 = 1;}
+    | ID                    {
+        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+        type2 = 0;
+        if( strcmp(typeArr[lookup_symbol($1, scope)],"bool") == 0 ) {
+            printflag = 1;
+            type2 = 1;
+        }
+        else if( strcmp(typeArr[lookup_symbol($1, scope)],"float32") == 0 ) {
+            printflag = 2;
+            type2 = 2;
+        }
+        else if( strcmp(typeArr[lookup_symbol($1, scope)],"string") == 0 ) {
+            printflag = 3;
+            type2 = 3;
+        }
+        add2 = lookup_symbol($1, scope);
+    }
     | expr
 ;
 
 assignVal
-    : '=' var           { printf("ASSIGN\n"); }
+    : '=' var           { 
+        if(type2 != type1) {
+            printf("error:%d: invalid operation: ASSIGN (mismatched types %s and %s)\n", yylineno, typeArr[add1], typeArr[add2]);
+        }
+        printf("ASSIGN\n"); 
+    }
     | ADD_ASSIGN var    { printf("ADD_ASSIGN\n"); }
     | SUB_ASSIGN var    { printf("SUB_ASSIGN\n"); }
     | MUL_ASSIGN var    { printf("MUL_ASSIGN\n"); }
@@ -156,21 +183,28 @@ assignVal
 
 ident
     : ID    { tmp_scope = -1;
+        type1 = 0;
         for(i=0; i<=scope; i++) {
             if(lookup_symbol($1, i) != -1) tmp_scope = lookup_symbol($1, i);
         }
-
+        add1 = tmp_scope;
         if( tmp_scope == -1 ) {
             printf("error:%d: undefined: %s\n", yylineno+1, $1);
         }
         else {
             printf("IDENT (name=%s, address=%d)\n", $1, tmp_scope); 
-            if( strcmp(typeArr[tmp_scope],"bool") == 0 )
+            if( strcmp(typeArr[tmp_scope],"bool") == 0 ) {
                 printflag = 1;
-            else if( strcmp(typeArr[tmp_scope],"float32") == 0 )
+                type1 = 1;
+            }
+            else if( strcmp(typeArr[tmp_scope],"float32") == 0 ) {
                 printflag = 2;
-            else if( strcmp(typeArr[tmp_scope],"string") == 0 )
+                type1 = 2;
+            }
+            else if( strcmp(typeArr[tmp_scope],"string") == 0 ) {
                 printflag = 3;
+                type1 = 3;
+            }
         }
     }
 ;
@@ -228,26 +262,51 @@ cal
     | ID '+' ID       { 
                         printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
+                        strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
+                        if( strcmp(ty1,ty2) != 0 ) {
+                            printf("error:%d: invalid operation: ADD (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        }
                         printf("ADD\n"); 
                       }
     | ID '-' ID       { 
                         printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
+                        strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
+                        if( strcmp(ty1,ty2) != 0 ) {
+                            printf("error:%d: invalid operation: SUB (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        }
                         printf("SUB\n"); 
                       }
     | ID '*' ID       { 
                         printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
+                        strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
+                        if( strcmp(ty1,ty2) != 0 ) {
+                            printf("error:%d: invalid operation: MUL (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        }
                         printf("MUL\n"); 
                       }
     | ID '/' ID       { 
                         printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
+                        strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
+                        if( strcmp(ty1,ty2) != 0 ) {
+                            printf("error:%d: invalid operation: QUO (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        }
                         printf("QUO\n"); 
                       }
     | ID '%' ID       { 
                         printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
+                        strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
+                        if( strcmp(ty1,ty2) != 0 ) {
+                            printf("error:%d: invalid operation: REM (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        }
                         printf("REM\n"); 
                       }
 ;
@@ -358,10 +417,10 @@ term
                         printflag = 1;
                 }
             }
-    | INT '(' ident ')'         { printf("F to I\n"); }
+    | INT '(' ident ')'         { printf("F to I\n"); type1 = 0;}
     | INT '(' FLOAT_LIT ')'     { printf("FLOAT_LIT %f\nF to I\n",$3); }
     | FLOAT '(' ident ')'       { printf("I to F\n"); }
-    | FLOAT '(' INT_LIT ')'     { printf("INT_LIT %d\nI to F\n",$3); }
+    | FLOAT '(' INT_LIT ')'     { printf("INT_LIT %d\nI to F\n",$3); type1 = 0;}
 ;
 
 %%
