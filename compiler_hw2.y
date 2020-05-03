@@ -32,7 +32,7 @@
     /* Symbol table function - you can add new function if needed. */
     static void create_symbol();
     static void insert_symbol(int, char*, char*, int, char*);
-    static int lookup_symbol(char*);
+    static int lookup_symbol(char*, int);
     static void dump_symbol(int);
 %}
 
@@ -95,6 +95,13 @@ stmt
     | block
     | setVal
     | error_assign
+    | ifelse
+;
+
+ifelse
+    : IF expr '{' {scope++;} stmts '}'      {scope--;}
+    | ELSE IF expr '{' {scope++;} stmts '}' {scope--;}
+    | ELSE '{' {scope++;} stmts '}'         {scope--;}
 ;
 
 error_assign
@@ -104,9 +111,10 @@ error_assign
     | FLOAT_LIT {printf("FLOAT_LIT %f\n", $1);} assignVal   {
         printf("error:%d: cannot assign to float32\n", yylineno);
     }
+;
 
 setVal
-    : ID '[' INT_LIT    { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1), $3);} ']' value_initial  { printf("ASSIGN\n"); }
+    : ID '[' INT_LIT    { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1, scope), $3);} ']' value_initial  { printf("ASSIGN\n"); }
     | ident assignVal
 ;
 
@@ -130,16 +138,16 @@ assignVal
 
 ident
     : ID    { 
-        if(lookup_symbol($1) == -1) {
+        if(lookup_symbol($1, scope) == -1) {
             printf("error:%d: undefined: %s\n", yylineno, $1);
         }
         else {
-            printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); 
-            if( strcmp(typeArr[lookup_symbol($1)],"bool") == 0 )
+            printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope)); 
+            if( strcmp(typeArr[lookup_symbol($1, scope)],"bool") == 0 )
                 printflag = 1;
-            else if( strcmp(typeArr[lookup_symbol($1)],"float32") == 0 )
+            else if( strcmp(typeArr[lookup_symbol($1, scope)],"float32") == 0 )
                 printflag = 2;
-            else if( strcmp(typeArr[lookup_symbol($1)],"string") == 0 )
+            else if( strcmp(typeArr[lookup_symbol($1, scope)],"string") == 0 )
                 printflag = 3;
         }
     }
@@ -190,36 +198,36 @@ STR_initial
 
 cal
     : ID '+' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                                 printf("ADD\n"); 
                              }
     | ID '-' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                                 printf("SUB\n"); 
                              }
     | ID '*' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                                 printf("MUL\n"); 
                              }
     | ID '/' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                                 printf("QUO\n"); 
                              }
     | ID '%' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                                 printf("REM\n"); 
                              }
     | ID INC NEWLINE         {
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                                 printf("INC\n");
                              }
     | ID DEC NEWLINE         {
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1));
+                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
                                 printf("DEC\n");
                              }
 ;
@@ -235,7 +243,7 @@ print
         else
             printf("PRINTLN string\n");
     }
-    | PRINT { printflag = 0; } '(' ident ')' {
+    | PRINT { printflag = 0; } '(' expr ')' {
         if(printflag == 0)
             printf("PRINT int32\n");
         else if(printflag == 1)
@@ -257,6 +265,7 @@ expr
     | andor expr
     | '(' expr ')'
     | bool                  { printflag = 1; }
+    | '"' STRING_LIT '"'    { printf("STRING_LIT %s\n", $2); printflag = 3; }
     | 
 ;
 
@@ -306,18 +315,23 @@ term
                                     printf("NEG\n");
                                 }
                             }
-    | ID { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); } '[' expr ']' 
-            {   if( strcmp(elementType[lookup_symbol($1)],"float32") == 0 )
+    | ID { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope)); } '[' expr ']' 
+            {   if( strcmp(elementType[lookup_symbol($1, scope)],"float32") == 0 )
                     printflag = 2;
-                else if( strcmp(elementType[lookup_symbol($1)],"string") == 0 )
+                else if( strcmp(elementType[lookup_symbol($1, scope)],"string") == 0 )
                     printflag = 3; }
-    | ID    {   printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); 
-                if( strcmp(typeArr[lookup_symbol($1)],"float32") == 0 )
-                    printflag = 2;
-                else if( strcmp(typeArr[lookup_symbol($1)],"string") == 0 )
-                    printflag = 3;
-                else if( strcmp(typeArr[lookup_symbol($1)],"bool") == 0 )
-                    printflag = 1;
+    | ID    {   if(lookup_symbol($1, scope) == -1) {
+                    printf("error:%d: undefined: %s\n", yylineno, $1);
+                }
+                else {
+                    printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope)); 
+                    if( strcmp(typeArr[lookup_symbol($1, scope)],"float32") == 0 )
+                        printflag = 2;
+                    else if( strcmp(typeArr[lookup_symbol($1, scope)],"string") == 0 )
+                        printflag = 3;
+                    else if( strcmp(typeArr[lookup_symbol($1, scope)],"bool") == 0 )
+                        printflag = 1;
+                }
             }
     | INT '(' ident ')'         { printf("F to I\n"); }
     | INT '(' FLOAT_LIT ')'     { printf("FLOAT_LIT %f\nF to I\n",$3); }
@@ -381,9 +395,9 @@ static void insert_symbol(int level, char *id, char *type, int linenum, char *el
     varNum++;
 }
 
-static int lookup_symbol(char *id) {
+static int lookup_symbol(char *id, int level) {
     for(int i=0; i<varNum; i++) {
-        if( strcmp(id,name[i]) == 0 ) {
+        if( strcmp(id,name[i]) == 0 && level == scopeArr[i]) {
             return i;
         }
     }
