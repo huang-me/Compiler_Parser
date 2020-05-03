@@ -24,6 +24,9 @@
     /* for type */
     char *tmp_type;
 
+    /* for check scope */
+    int tmp_scope, i;
+
     void yyerror (char const *s)
     {
         printf("error:%d: %s\n", yylineno, s);
@@ -96,6 +99,16 @@ stmt
     | setVal
     | error_assign
     | ifelse
+    | forloop
+;
+
+forloop
+    : FOR expr '{' {scope++;} stmts '}'     {scope--;}
+    | FOR forexpr '{' {scope++;} stmts '}'     {scope--;}
+;
+
+forexpr
+    : ident assignVal ';' ident compare ';' cal
 ;
 
 ifelse
@@ -105,17 +118,22 @@ ifelse
 ;
 
 error_assign
-    : INT_LIT {printf("INT_LIT %d\n", $1);} assignVal   {
-        printf("error:%d: cannot assign to int32\n", yylineno);
-    }
-    | FLOAT_LIT {printf("FLOAT_LIT %f\n", $1);} assignVal   {
-        printf("error:%d: cannot assign to float32\n", yylineno);
-    }
+    : INT_LIT {printf("INT_LIT %d\n", $1); } assign
+    | FLOAT_LIT {printf("FLOAT_LIT %f\n", $1);} assign
+;
+
+assign
+    : '=' expr           { printf("ASSIGN\n"); }
+    | ADD_ASSIGN expr    { printf("error:%d: cannot assign to int32\nADD_ASSIGN\n", yylineno); }
+    | SUB_ASSIGN     { printf("SUB_ASSIGN\n"); }
+    | MUL_ASSIGN     { printf("MUL_ASSIGN\n"); }
+    | QUO_ASSIGN     { printf("QUO_ASSIGN\n"); }
+    | REM_ASSIGN     { printf("REM_ASSIGN\n"); }
 ;
 
 setVal
     : ID '[' INT_LIT    { printf("IDENT (name=%s, address=%d)\nINT_LIT %d\n", $1,lookup_symbol($1, scope), $3);} ']' value_initial  { printf("ASSIGN\n"); }
-    | ident assignVal
+    | ident assignVal NEWLINE
 ;
 
 var
@@ -137,17 +155,21 @@ assignVal
 ;
 
 ident
-    : ID    { 
-        if(lookup_symbol($1, scope) == -1) {
-            printf("error:%d: undefined: %s\n", yylineno, $1);
+    : ID    { tmp_scope = -1;
+        for(i=0; i<=scope; i++) {
+            if(lookup_symbol($1, i) != -1) tmp_scope = lookup_symbol($1, i);
+        }
+
+        if( tmp_scope == -1 ) {
+            printf("error:%d: undefined: %s\n", yylineno+1, $1);
         }
         else {
-            printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope)); 
-            if( strcmp(typeArr[lookup_symbol($1, scope)],"bool") == 0 )
+            printf("IDENT (name=%s, address=%d)\n", $1, tmp_scope); 
+            if( strcmp(typeArr[tmp_scope],"bool") == 0 )
                 printflag = 1;
-            else if( strcmp(typeArr[lookup_symbol($1, scope)],"float32") == 0 )
+            else if( strcmp(typeArr[tmp_scope],"float32") == 0 )
                 printflag = 2;
-            else if( strcmp(typeArr[lookup_symbol($1, scope)],"string") == 0 )
+            else if( strcmp(typeArr[tmp_scope],"string") == 0 )
                 printflag = 3;
         }
     }
@@ -197,43 +219,41 @@ STR_initial
 ;
 
 cal
-    : ID '+' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
-                                printf("ADD\n"); 
-                             }
-    | ID '-' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
-                                printf("SUB\n"); 
-                             }
-    | ID '*' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
-                                printf("MUL\n"); 
-                             }
-    | ID '/' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
-                                printf("QUO\n"); 
-                             }
-    | ID '%' ID NEWLINE      { 
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
-                                printf("REM\n"); 
-                             }
-    | ID INC NEWLINE         {
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("INC\n");
-                             }
-    | ID DEC NEWLINE         {
-                                printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
-                                printf("DEC\n");
-                             }
+    : ident INC       {
+                        printf("INC\n");
+                      }
+    | ident DEC       {
+                        printf("DEC\n");
+                      }
+    | ID '+' ID       { 
+                        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                        printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        printf("ADD\n"); 
+                      }
+    | ID '-' ID       { 
+                        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                        printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        printf("SUB\n"); 
+                      }
+    | ID '*' ID       { 
+                        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                        printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        printf("MUL\n"); 
+                      }
+    | ID '/' ID       { 
+                        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                        printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        printf("QUO\n"); 
+                      }
+    | ID '%' ID       { 
+                        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+                        printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
+                        printf("REM\n"); 
+                      }
 ;
 
 print
-    : PRINTLN { printflag = 0; } '(' expr ')' NEWLINE {
+    : PRINTLN { printflag = 0; } '(' expr ')' {
         if(printflag == 0)
             printf("PRINTLN int32\n");
         else if(printflag == 1)
@@ -320,16 +340,21 @@ term
                     printflag = 2;
                 else if( strcmp(elementType[lookup_symbol($1, scope)],"string") == 0 )
                     printflag = 3; }
-    | ID    {   if(lookup_symbol($1, scope) == -1) {
-                    printf("error:%d: undefined: %s\n", yylineno, $1);
+    | ID    {   tmp_scope = -1;
+                for(i=0; i<=scope; i++) {
+                    if( lookup_symbol($1, i) != -1) tmp_scope = lookup_symbol($1, i);
+                }
+
+                if( tmp_scope == -1 ) {
+                    printf("error:%d: undefined: %s\n", yylineno+1, $1);
                 }
                 else {
-                    printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope)); 
-                    if( strcmp(typeArr[lookup_symbol($1, scope)],"float32") == 0 )
+                    printf("IDENT (name=%s, address=%d)\n", $1, tmp_scope); 
+                    if( strcmp(typeArr[tmp_scope],"float32") == 0 )
                         printflag = 2;
-                    else if( strcmp(typeArr[lookup_symbol($1, scope)],"string") == 0 )
+                    else if( strcmp(typeArr[tmp_scope],"string") == 0 )
                         printflag = 3;
-                    else if( strcmp(typeArr[lookup_symbol($1, scope)],"bool") == 0 )
+                    else if( strcmp(typeArr[tmp_scope],"bool") == 0 )
                         printflag = 1;
                 }
             }
@@ -397,7 +422,7 @@ static void insert_symbol(int level, char *id, char *type, int linenum, char *el
 
 static int lookup_symbol(char *id, int level) {
     for(int i=0; i<varNum; i++) {
-        if( strcmp(id,name[i]) == 0 && level == scopeArr[i]) {
+        if( strcmp(id,name[i]) == 0 && level == scopeArr[i] ) {
             return i;
         }
     }
@@ -414,6 +439,7 @@ static void dump_symbol(int level) {
             indexArr[i], name[i], typeArr[i], i, lineno[i], elementType[i]);
 
             scopeArr[i] = -1;
+            strcpy(name[i], "");
         }
     }
 
