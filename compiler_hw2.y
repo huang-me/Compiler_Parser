@@ -107,6 +107,7 @@ var
     | '"' STRING_LIT '"'    {printf("STRING_LIT %s\n", $2);}
     | TRUE                  {printf("TRUE\n");}
     | FALSE                 {printf("FALSE\n");}
+    | expr
 ;
 
 assignVal
@@ -119,7 +120,20 @@ assignVal
 ;
 
 ident
-    : ID    { printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); }
+    : ID    { 
+        if(lookup_symbol($1) == -1) {
+            printf("error:%d: undefined: %s\n", yylineno, $1);
+        }
+        else {
+            printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1)); 
+            if( strcmp(typeArr[lookup_symbol($1)],"bool") == 0 )
+                printflag = 1;
+            else if( strcmp(typeArr[lookup_symbol($1)],"float32") == 0 )
+                printflag = 2;
+            else if( strcmp(typeArr[lookup_symbol($1)],"string") == 0 )
+                printflag = 3;
+        }
+    }
 ;
 
 value_initial
@@ -212,6 +226,16 @@ print
         else
             printf("PRINTLN string\n");
     }
+    | PRINT { printflag = 0; } '(' ident ')' {
+        if(printflag == 0)
+            printf("PRINT int32\n");
+        else if(printflag == 1)
+            printf("PRINT bool\n");
+        else if(printflag == 2)
+            printf("PRINT float32\n");
+        else
+            printf("PRINT string\n");
+    }
 ;
 
 expr
@@ -286,6 +310,10 @@ term
                 else if( strcmp(typeArr[lookup_symbol($1)],"bool") == 0 )
                     printflag = 1;
             }
+    | INT '(' ident ')'         { printf("F to I\n"); }
+    | INT '(' FLOAT_LIT ')'     { printf("FLOAT_LIT %f\nF to I\n",$3); }
+    | FLOAT '(' ident ')'       { printf("I to F\n"); }
+    | FLOAT '(' INT_LIT ')'     { printf("INT_LIT %d\nI to F\n",$3); }
 ;
 
 %%
@@ -323,6 +351,13 @@ static void create_symbol() {
 }
 
 static void insert_symbol(int level, char *id, char *type, int linenum, char *element) {
+    for(int i=0; i<varNum; i++) {
+        if(strcmp(name[i],id) == 0 && scopeArr[i] == level) {
+            printf("error:%d: %s redeclared in this block. previous declaration at line %d\n", linenum, id, lineno[i]);
+            return;
+        }
+    }
+    
     printf("> Insert {%s} into symbol table (scope level: %d)\n", id, level);
     
     int i = varNum;
@@ -339,7 +374,7 @@ static void insert_symbol(int level, char *id, char *type, int linenum, char *el
 
 static int lookup_symbol(char *id) {
     for(int i=0; i<varNum; i++) {
-        if(*id == *name[i]) {
+        if( strcmp(id,name[i]) == 0 ) {
             return i;
         }
     }
