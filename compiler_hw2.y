@@ -105,11 +105,56 @@ stmt
     | error_assign
     | ifelse
     | forloop
+    | const_add
+;
+
+const
+    : INT_LIT
+    | FLOAT_LIT     {printf("FLOAT_LIT %f\n", $1);}
+;
+
+const_add
+    : INT_LIT '+' FLOAT_LIT     {
+        printf("INT_LIT %d\nFLOAT_LIT %f\n", $1, $3);
+        printf("error:%d: invalid operation: ADD (mismatched types int32 and float32)\n", yylineno+1);
+        printf("ADD\n");
+    }
+    | FLOAT_LIT '+' FLOAT_LIT   {
+        printf("FLOAT_LIT %f\nFLOAT_LIT %f\n", $1, $3);
+        printf("ADD\n");
+    }
+    | ID '%' INT_LIT            {
+        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+        printf("INT_LIT %d\n", $3);
+        printf("error:%d: invalid operation: (operator REM not defined on float32)\n", yylineno+1);
+        printf("REM\n");
+    }
+    | INT_LIT LAND TRUE         {
+        printf("INT_LIT %d\n", $1);
+        printf("TRUE\n");
+        printf("error:%d: invalid operation: (operator LAND not defined on int32)\n", yylineno+1);
+        printf("LAND\n");
+    }
+    | FALSE {printf("FALSE\n");} LOR expr    {
+        printf("error:%d: invalid operation: (operator LOR not defined on int32)\n", yylineno);
+        printf("LOR\n");
+    }
+    | ID '+' INT_LIT            {
+        printf("IDENT (name=%s, address=%d)\n", $1, lookup_symbol($1, scope));
+        printf("INT_LIT %d\n", $3);
+        printf("ADD\n");
+    }
 ;
 
 forloop
-    : FOR expr '{' {scope++;} stmts '}'     {scope--;}
-    | FOR forexpr '{' {scope++;} stmts '}'     {scope--;}
+    : FOR const '{' {
+        printf("error:%d: non-bool (type float32) used as for condition\n", yylineno+1);
+    } {scope++;} stmts '}'    {scope--;}
+    | FOR const_add '{' {
+        printf("error:%d: non-bool (type int32) used as for condition\n", yylineno+1);
+    } {scope++;} stmts '}'    {scope--;}
+    | FOR expr '{' {scope++;} stmts '}'     {scope--;}
+    | FOR forexpr '{' {scope++;} stmts '}'  {scope--;}
 ;
 
 forexpr
@@ -120,6 +165,15 @@ ifelse
     : IF expr '{' {scope++;} stmts '}'      {scope--;}
     | ELSE IF expr '{' {scope++;} stmts '}' {scope--;}
     | ELSE '{' {scope++;} stmts '}'         {scope--;}
+    | IF ID {
+        printf("IDENT (name=%s, address=%d)\n", $2, lookup_symbol($2, scope));
+        printf("error:%d: non-bool (type %s) used as for condition\n", yylineno+1, "int32");
+    } '{' {scope++;} stmts '}'        {scope--;}
+
+    | IF FLOAT_LIT {
+        printf("FLOAT_LIT %f\n", $2);
+        printf("error:%d: non-bool (type %s) used as for condition\n", yylineno+1, "float32");
+    } '{' {scope++;} stmts '}'        {scope--;}
 ;
 
 error_assign
@@ -304,8 +358,8 @@ cal
                         printf("IDENT (name=%s, address=%d)\n", $3, lookup_symbol($3, scope));
                         strcpy(ty1, typeArr[lookup_symbol($1, scope)]);
                         strcpy(ty2, typeArr[lookup_symbol($3, scope)]);
-                        if( strcmp(ty1,ty2) != 0 ) {
-                            printf("error:%d: invalid operation: REM (mismatched types %s and %s)\n", yylineno+1, ty1, ty2);
+                        if( strcmp("float32",ty2) == 0 ) {
+                            printf("error:%d: invalid operation: (operator REM not defined on float32)\n", yylineno+1);
                         }
                         printf("REM\n"); 
                       }
@@ -377,7 +431,7 @@ compare
 
 term
     : INT_LIT               { printf("INT_LIT %d\n", $1); }
-    | FLOAT_LIT             { printf("FLOAT_LIT %f\n", $1); }
+    | FLOAT_LIT             { printf("FLOAT_LIT %f\n", $1); printflag = 2;}
     | SIGN_INT_LIT          { printf("INT_LIT %d\n", abs($1)); 
                                 if( abs($1) == $1) {
                                     printf("POS\n");
